@@ -1,0 +1,17 @@
+{
+  "name": "memos-wechat-bot",
+  "version": "0.8.0",
+  "description": "企业微信自建应用 + Memos 机器人（文本自动保存，命令查询，动态菜单）",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "axios": "^1.4.0",
+    "@wecom/crypto": "^1.0.1",
+    "xml2js": "^0.6.0"
+  },
+  "author": "Your Name",
+  "license": "MIT"
+}

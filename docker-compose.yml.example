@@ -1,0 +1,30 @@
+version: '3.3'
+
+services:
+  memos-wechat-bot:
+    build: .
+    container_name: memos-wechat-bot
+    restart: unless-stopped
+    ports:
+      - "6330:3000"          # 宿主机端口映射，可根据需要修改左侧端口
+    volumes:
+      - ./data:/data          # 持久化目录，存放用户配置（令牌、可见性等）
+    environment:
+      # -------------------- 企业微信应用配置（必须）--------------------
+      - WECOM_CORP_ID=your_corp_id          # 企业微信企业ID
+      - WECOM_AGENT_ID=your_agent_id        # 自建应用AgentId
+      - WECOM_SECRET=your_secret            # 自建应用Secret
+      - WECOM_TOKEN=your_token              # 回调配置的Token（需与企业微信后台一致）
+      - WECOM_ENCODING_AES_KEY=your_encoding_aes_key  # 回调配置的EncodingAESKey（43位）
+      
+      # -------------------- Memos 配置（必须）--------------------
+      - MEMOS_URL=http://your-memos-ip:5230/api/v1/memos   # Memos API地址
+      - MEMOS_WEB_URL=http://your-memos-ip:5230            # Memos 网页地址（用于生成分享链接）
+      
+      # -------------------- 可选配置（已标注默认值）--------------------
+      # - PROXY_URL=http://your-proxy:80       # 企业微信 API 代理地址（默认直连官方API）
+      # - NO_MENU=false                       # 是否禁用动态菜单（默认 false）
+      # - LOG_LEVEL=info                      # 日志级别：error/warn/info/debug（默认 info）
+      # - WECOM_TOUSER=@all                  # 主动发送消息的默认接收者（默认 @all）
+      # - MEMOS_DEFAULT_TAG=#企业微信机器人   # 保存笔记时默认添加的标签（默认 #企业微信机器人）
+      # - MEMOS_VISIBILITY=PRIVATE           # 新用户默认可见性（默认 PRIVATE，可选 PROTECTED/PUBLIC）
