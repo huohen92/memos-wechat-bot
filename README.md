@@ -65,6 +65,8 @@ docker-compose up -d
 
 ---
 
+## 🐳 部署方式
+
 ### 方式 A：使用 Docker Compose（推荐）
 
 将以下内容保存为 `docker-compose.yml`（或参考 `docker-compose.yml.example` 进行修改），然后执行 `docker-compose up -d`：
@@ -94,19 +96,19 @@ services:
       - MEMOS_WEB_URL=http://your-memos-ip:5230            # Memos 网页地址（用于生成分享链接）
 
       # -------------------- 可选配置（已标注默认值）--------------------
-      # - PROXY_URL=http://your-proxy:80       # 企业微信 API 代理地址（默认直连官方API）
-      # - NO_MENU=false                       # 是否禁用动态菜单（默认 false）
-      # - LOG_LEVEL=info                      # 日志级别：error/warn/info/debug（默认 info）
-      # - WECOM_TOUSER=@all                  # 主动发送消息的默认接收者（默认 @all）
-      # - MEMOS_DEFAULT_TAG=#企业微信机器人   # 保存笔记时默认添加的标签（默认 #企业微信机器人）
-      # - MEMOS_VISIBILITY=PRIVATE           # 新用户默认可见性（默认 PRIVATE，可选 PROTECTED/PUBLIC）
+      # - PROXY_URL=https://qyapi.weixin.qq.com # 企业微信 API 代理地址（默认直连官方API）
+      # - NO_MENU=false                        # 是否禁用动态菜单（默认 false）
+      # - LOG_LEVEL=info                       # 日志级别：error/warn/info/debug（默认 info）
+      # - WECOM_TOUSER=@all                    # 主动发送消息的默认接收者（默认 @all）
+      # - MEMOS_DEFAULT_TAG=#企业微信机器人     # 保存笔记时默认添加的标签（默认 #企业微信机器人）
+      # - MEMOS_VISIBILITY=PRIVATE             # 新用户默认可见性（默认 PRIVATE，可选 PROTECTED/PUBLIC）
 ```
 
-### 方式 B：使用 Docker run
+### 方式 B：使用 Docker run（逐行版：必填 + 可选默认注释）
 
 如果你不想使用 Compose，可以用下面两步完成同样的部署。
 
-1）先构建镜像（对应 `build: .`）：
+1）先构建镜像（对应 Compose 的 `build: .`）：
 
 ```bash
 docker build -t memos-wechat-bot .
@@ -114,11 +116,11 @@ docker build -t memos-wechat-bot .
 
 2）运行容器（对应 `ports/volumes/environment/restart`）：
 
-```bash
-docker run -d   --name memos-wechat-bot   --restart unless-stopped   -p 6330:3000   -v "$(pwd)/data:/data"   -e WECOM_CORP_ID=your_corp_id   -e WECOM_AGENT_ID=your_agent_id   -e WECOM_SECRET=your_secret   -e WECOM_TOKEN=your_token   -e WECOM_ENCODING_AES_KEY=your_encoding_aes_key   -e MEMOS_URL=http://your-memos-ip:5230/api/v1/memos   -e MEMOS_WEB_URL=http://your-memos-ip:5230   memos-wechat-bot
-```
+> 说明：非必要变量已按默认值注释，**需要启用时删除 `#`**。
 
-> 可选配置同理用 `-e` 追加，例如：`-e LOG_LEVEL=debug`、`-e NO_MENU=true`。
+```bash
+docker run -d   --name memos-wechat-bot   --restart unless-stopped   -p 6330:3000   -v "$(pwd)/data:/data"     # -------------------- 企业微信应用配置（必须）--------------------   -e WECOM_CORP_ID=your_corp_id   -e WECOM_AGENT_ID=your_agent_id   -e WECOM_SECRET=your_secret   -e WECOM_TOKEN=your_token   -e WECOM_ENCODING_AES_KEY=your_encoding_aes_key     # -------------------- Memos 配置（必须）--------------------   -e MEMOS_URL=http://your-memos-ip:5230/api/v1/memos   -e MEMOS_WEB_URL=http://your-memos-ip:5230     # -------------------- 可选配置（按默认值注释，需要时取消注释）--------------------   # -e PROXY_URL=https://qyapi.weixin.qq.com   # -e NO_MENU=false   # -e LOG_LEVEL=info   # -e WECOM_TOUSER=@all   # -e MEMOS_DEFAULT_TAG=#企业微信机器人   # -e MEMOS_VISIBILITY=PRIVATE     memos-wechat-bot
+```
 
 ---
 
@@ -150,7 +152,7 @@ docker run -d   --name memos-wechat-bot   --restart unless-stopped   -p 6330:300
 | WECOM_ENCODING_AES_KEY | ✅ | 无 | 回调配置的EncodingAESKey（43位） |
 | MEMOS_URL | ✅ | 无 | Memos API地址，例如 `http://192.168.1.100:5230/api/v1/memos` |
 | MEMOS_WEB_URL | ✅ | 无 | Memos 网页地址，例如 `http://192.168.1.100:5230` |
-| PROXY_URL | ❌ | 无 | 企业微信API代理地址（如无法直连时使用） |
+| PROXY_URL | ❌ | https://qyapi.weixin.qq.com | 企业微信API代理地址（如无法直连时使用） |
 | NO_MENU | ❌ | false | 是否禁用动态菜单（true=禁用） |
 | LOG_LEVEL | ❌ | info | 日志级别：error、warn、info、debug |
 | WECOM_TOUSER | ❌ | @all | 主动发送消息的默认接收者 |
@@ -214,22 +216,6 @@ docker run -d   --name memos-wechat-bot   --restart unless-stopped   -p 6330:300
 | `/stats` | 统计备忘录总数（最多1000条） |
 | `/tags` | 列出最近50条笔记中的常用标签 |
 | `/random` | 随机返回一条备忘录 |
-
----
-
-## 🛠️ 开发与构建
-
-### 手动构建镜像
-
-```bash
-docker build -t memos-wechat-bot .
-```
-
-### 运行容器
-
-```bash
-docker run -d   --name memos-wechat-bot   -p 6330:3000   -v $(pwd)/data:/data   --env-file .env   memos-wechat-bot
-```
 
 ---
 
