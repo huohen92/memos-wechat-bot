@@ -65,6 +65,63 @@ docker-compose up -d
 
 ---
 
+### 方式 A：使用 Docker Compose（推荐）
+
+将以下内容保存为 `docker-compose.yml`（或参考 `docker-compose.yml.example` 进行修改），然后执行 `docker-compose up -d`：
+
+```yaml
+version: '3.3'
+
+services:
+  memos-wechat-bot:
+    build: .
+    container_name: memos-wechat-bot
+    restart: unless-stopped
+    ports:
+      - "6330:3000"          # 宿主机端口映射，可根据需要修改左侧端口
+    volumes:
+      - ./data:/data          # 持久化目录，存放用户配置（令牌、可见性等）
+    environment:
+      # -------------------- 企业微信应用配置（必须）--------------------
+      - WECOM_CORP_ID=your_corp_id          # 企业微信企业ID
+      - WECOM_AGENT_ID=your_agent_id        # 自建应用AgentId
+      - WECOM_SECRET=your_secret            # 自建应用Secret
+      - WECOM_TOKEN=your_token              # 回调配置的Token（需与企业微信后台一致）
+      - WECOM_ENCODING_AES_KEY=your_encoding_aes_key  # 回调配置的EncodingAESKey（43位）
+
+      # -------------------- Memos 配置（必须）--------------------
+      - MEMOS_URL=http://your-memos-ip:5230/api/v1/memos   # Memos API地址
+      - MEMOS_WEB_URL=http://your-memos-ip:5230            # Memos 网页地址（用于生成分享链接）
+
+      # -------------------- 可选配置（已标注默认值）--------------------
+      # - PROXY_URL=http://your-proxy:80       # 企业微信 API 代理地址（默认直连官方API）
+      # - NO_MENU=false                       # 是否禁用动态菜单（默认 false）
+      # - LOG_LEVEL=info                      # 日志级别：error/warn/info/debug（默认 info）
+      # - WECOM_TOUSER=@all                  # 主动发送消息的默认接收者（默认 @all）
+      # - MEMOS_DEFAULT_TAG=#企业微信机器人   # 保存笔记时默认添加的标签（默认 #企业微信机器人）
+      # - MEMOS_VISIBILITY=PRIVATE           # 新用户默认可见性（默认 PRIVATE，可选 PROTECTED/PUBLIC）
+```
+
+### 方式 B：使用 Docker run
+
+如果你不想使用 Compose，可以用下面两步完成同样的部署。
+
+1）先构建镜像（对应 `build: .`）：
+
+```bash
+docker build -t memos-wechat-bot .
+```
+
+2）运行容器（对应 `ports/volumes/environment/restart`）：
+
+```bash
+docker run -d   --name memos-wechat-bot   --restart unless-stopped   -p 6330:3000   -v "$(pwd)/data:/data"   -e WECOM_CORP_ID=your_corp_id   -e WECOM_AGENT_ID=your_agent_id   -e WECOM_SECRET=your_secret   -e WECOM_TOKEN=your_token   -e WECOM_ENCODING_AES_KEY=your_encoding_aes_key   -e MEMOS_URL=http://your-memos-ip:5230/api/v1/memos   -e MEMOS_WEB_URL=http://your-memos-ip:5230   memos-wechat-bot
+```
+
+> 可选配置同理用 `-e` 追加，例如：`-e LOG_LEVEL=debug`、`-e NO_MENU=true`。
+
+---
+
 ## 🧩 企业微信自建应用回调配置示例
 
 在企业微信管理后台为**自建应用**配置「接收消息服务器」时，可按如下示例填写：
@@ -78,14 +135,14 @@ docker-compose up -d
 - **Token**：与环境变量 `WECOM_TOKEN` 保持一致
 - **EncodingAESKey**：与环境变量 `WECOM_ENCODING_AES_KEY` 保持一致（43 位）
 
-> 提示：若你的企业微信后台要求使用 HTTPS，请将 URL 改为 `https://你的域名/callback`，并确保反向代理与证书配置正确。
+> 提示：企业微信服务器需要能访问该 URL（通常要求公网可达）。若后台要求使用 HTTPS，请将 URL 改为 `https://你的域名/callback` 并配置好证书/反向代理。
 
 ---
 
 ## ⚙️ 环境变量说明
 
 | 变量名 | 必填 | 默认值 | 说明 |
-|------|------|------|------|
+|---|---|---|---|
 | WECOM_CORP_ID | ✅ | 无 | 企业微信企业ID |
 | WECOM_AGENT_ID | ✅ | 无 | 自建应用AgentId |
 | WECOM_SECRET | ✅ | 无 | 自建应用Secret |
@@ -107,7 +164,7 @@ docker-compose up -d
 ### 基础命令
 
 | 命令 | 说明 |
-|------|------|
+|---|---|
 | `/start <令牌>` | 设置你的 Memos 令牌 |
 | `/set_visibility <私有/工作区/公开>` | 修改默认可见性 |
 | `/get_visibility` | 查询当前默认可见性 |
@@ -122,7 +179,7 @@ docker-compose up -d
 ### 查询类
 
 | 命令 | 说明 |
-|------|------|
+|---|---|
 | `/list [页码]` | 列出最近的备忘录 |
 | `/search <关键词> [页码]` | 搜索包含关键词的备忘录 |
 | `/search_all <关键词> [页码]` | 显示所有匹配备忘录的完整内容 |
@@ -133,7 +190,7 @@ docker-compose up -d
 ### 智能导航
 
 | 命令 | 说明 |
-|------|------|
+|---|---|
 | `/view <序号>` | 查看指定序号的完整内容，进入详细模式 |
 | `/up` | 列表模式下翻上一页，详细模式下查看上一条 |
 | `/down` | 列表模式下翻下一页，详细模式下查看下一条 |
@@ -143,7 +200,7 @@ docker-compose up -d
 ### 直接操作
 
 | 命令 | 说明 |
-|------|------|
+|---|---|
 | `/get <memoId>` | 通过 ID 获取单条备忘录 |
 | `/update <memoId> <新内容>` | 更新备忘录 |
 | `/delete <memoId>` | 删除备忘录 |
@@ -153,7 +210,7 @@ docker-compose up -d
 ### 其他
 
 | 命令 | 说明 |
-|------|------|
+|---|---|
 | `/stats` | 统计备忘录总数（最多1000条） |
 | `/tags` | 列出最近50条笔记中的常用标签 |
 | `/random` | 随机返回一条备忘录 |
@@ -171,12 +228,7 @@ docker build -t memos-wechat-bot .
 ### 运行容器
 
 ```bash
-docker run -d \
-  --name memos-wechat-bot \
-  -p 6330:3000 \
-  -v $(pwd)/data:/data \
-  --env-file .env \
-  memos-wechat-bot
+docker run -d   --name memos-wechat-bot   -p 6330:3000   -v $(pwd)/data:/data   --env-file .env   memos-wechat-bot
 ```
 
 ---
