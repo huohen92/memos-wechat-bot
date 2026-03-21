@@ -104,7 +104,7 @@ services:
       # - MEMOS_VISIBILITY=PRIVATE             # 新用户默认可见性（默认 PRIVATE，可选 PROTECTED/PUBLIC）
 ```
 
-### 方式 B：使用 Docker run（逐行版：必填 + 可选默认注释）
+### 方式 B：使用 Docker run
 
 如果你不想使用 Compose，可以用下面两步完成同样的部署。
 
