@@ -71,11 +71,12 @@ docker-compose up -d
 
 将以下内容保存为 `docker-compose.yml`（或参考 `docker-compose.yml.example` 进行修改），然后执行 `docker-compose up -d`：
 
-`version: '3.3'
+```yaml
+version: '3.3'
 
 services:
   memos-wechat-bot:
-    image: huohen92/memos-wechat-bot:latest   
+    image: huohen92/memos-wechat-bot:latest .
     container_name: memos-wechat-bot
     restart: unless-stopped
     ports:
@@ -102,6 +103,7 @@ services:
       # - MEMOS_DEFAULT_TAG=#企业微信机器人     # 保存笔记时默认添加的标签（默认 #企业微信机器人）
       # - MEMOS_VISIBILITY=PRIVATE             # 新用户默认可见性（默认 PRIVATE，可选 PROTECTED/PUBLIC）
 ```
+
 
 ### 方式 B：使用 Docker run
 
