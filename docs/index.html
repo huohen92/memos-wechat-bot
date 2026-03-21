@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="description" content="Memos 企业微信机器人：将企业微信自建应用与 Memos 深度集成，支持文本自动保存、命令交互、动态菜单、多模式查询。" />
+  <title>Memos 企业微信机器人</title>
+  <link rel="stylesheet" href="./assets/style.css" />
+  <link rel="icon" href="./assets/logo.svg" type="image/svg+xml" />
+</head>
+<body>
+  <header class="top">
+    <div class="container">
+      <div class="brand">
+        <img class="logo" src="./assets/logo.svg" alt="logo" />
+        <div>
+          <h1>Memos 企业微信机器人</h1>
+          <p class="sub">企业微信自建应用 × Memos：一键部署，文本自动保存，命令查询与动态菜单</p>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="themeToggle" type="button" aria-label="切换主题" title="切换主题">
+          <span id="themeIcon" aria-hidden="true">🌙</span>
+          <span class="sr-only">切换主题</span>
+        </button>
+        <a class="btn primary" href="https://github.com/huohen92/memos-wechat-bot" target="_blank" rel="noreferrer">GitHub</a>
+        <a class="btn" href="https://hub.docker.com/r/huohen92/memos-wechat-bot" target="_blank" rel="noreferrer">Docker Hub</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h2>✨ 功能特性</h2>
+      <ul class="grid">
+        <li><b>文本自动保存</b>：直接发送文本消息，自动添加标签并保存到 Memos。</li>
+        <li><b>命令系统</b>：/start、/list、/search、/today、/week 等常用命令。</li>
+        <li><b>智能导航</b>：列表/详细模式切换，支持翻页与上下条浏览。</li>
+        <li><b>动态菜单</b>：支持开关菜单、一键触达常用功能。</li>
+        <li><b>多用户</b>：每个用户独立配置 Token、默认可见性与标签。</li>
+        <li><b>持久化</b>：配置写入 /data/config.json，容器重启不丢失。</li>
+      </ul>
+    </section>
+
+    <section class="card">
+      <h2>🚀 快速开始</h2>
+      <ol>
+        <li>克隆仓库
+          <pre><code>git clone https://github.com/huohen92/memos-wechat-bot.git
+cd memos-wechat-bot</code></pre>
+        </li>
+        <li>使用 Docker Compose 启动（现成镜像版）
+          <pre><code>docker compose pull
+docker compose up -d</code></pre>
+        </li>
+        <li>在企业微信中初始化
+          <pre><code>/start &lt;你的Memos令牌&gt;</code></pre>
+        </li>
+      </ol>
+      <p class="hint">提示：企业微信服务器需要能访问你的回调 URL（通常需要公网域名/HTTPS/反向代理）。</p>
+    </section>
+
+    <section class="card">
+      <h2>🐳 部署方式（现成镜像）</h2>
+      <p class="hint">提示：代码块右上角支持“一键复制”。</p>
+      <div class="tabs" role="tablist">
+        <button class="tab active" role="tab" aria-selected="true" data-tab="compose">Docker Compose</button>
+        <button class="tab" role="tab" aria-selected="false" data-tab="run">Docker run</button>
+      </div>
+
+      <div class="tabpanel active" id="tab-compose" role="tabpanel">
+        <p>保存为 <code>docker-compose.yml</code> 后执行 <code>docker compose up -d</code>：</p>
+        <pre><code class="language-yaml">version: '3.3'
+
+services:
+  memos-wechat-bot:
+    image: huohen92/memos-wechat-bot:latest
+    container_name: memos-wechat-bot
+    restart: unless-stopped
+    ports:
+      - "6330:3000"
+    volumes:
+      - ./data:/data
+    environment:
+      # -------------------- 企业微信应用配置（必须）--------------------
+      - WECOM_CORP_ID=your_corp_id
+      - WECOM_AGENT_ID=your_agent_id
+      - WECOM_SECRET=your_secret
+      - WECOM_TOKEN=your_token
+      - WECOM_ENCODING_AES_KEY=your_encoding_aes_key
+
+      # -------------------- Memos 配置（必须）--------------------
+      - MEMOS_URL=http://your-memos-ip:5230/api/v1/memos
+      - MEMOS_WEB_URL=http://your-memos-ip:5230
+
+      # -------------------- 可选配置（按默认值注释，需要时取消注释）--------------------
+      # - PROXY_URL=https://qyapi.weixin.qq.com
+      # - NO_MENU=false
+      # - LOG_LEVEL=info
+      # - WECOM_TOUSER=@all
+      # - MEMOS_DEFAULT_TAG=#企业微信机器人
+      # - MEMOS_VISIBILITY=PRIVATE</code></pre>
+      </div>
+
+      
+    <div class="tabpanel" id="tab-run" role="tabpanel">
+        <p>运行容器（非必要变量按默认值注释，启用时删除 <code>#</code>）：</p>
+        <pre><code>docker run -d \
+  --name memos-wechat-bot \
+  --restart unless-stopped \
+  -p 6330:3000 \
+  -v "$(pwd)/data:/data" \
+  \
+  # -------------------- 企业微信应用配置（必须）-------------------- \
+  -e WECOM_CORP_ID=your_corp_id \
+  -e WECOM_AGENT_ID=your_agent_id \
+  -e WECOM_SECRET=your_secret \
+  -e WECOM_TOKEN=your_token \
+  -e WECOM_ENCODING_AES_KEY=your_encoding_aes_key \
+  \
+  # -------------------- Memos 配置（必须）-------------------- \
+  -e MEMOS_URL=http://your-memos-ip:5230/api/v1/memos \
+  -e MEMOS_WEB_URL=http://your-memos-ip:5230 \
+  \
+  # -------------------- 可选配置（按默认值注释，需要时取消注释）-------------------- \
+  # -e PROXY_URL=https://qyapi.weixin.qq.com \
+  # -e NO_MENU=false \
+  # -e LOG_LEVEL=info \
+  # -e WECOM_TOUSER=@all \
+  # -e MEMOS_DEFAULT_TAG=#企业微信机器人 \
+  # -e MEMOS_VISIBILITY=PRIVATE \
+  \
+  memos-wechat-bot:latest</code></pre>
+              </div>
+
+    </section>
+
+    <section class="card">
+      <h2>🧩 回调配置</h2>
+      <p>企业微信后台自建应用「接收消息服务器」示例：</p>
+      <pre><code>URL: http://&lt;你的域名或公网IP&gt;:6330/callback
+Token: 与 WECOM_TOKEN 一致
+EncodingAESKey: 与 WECOM_ENCODING_AES_KEY 一致（43位）</code></pre>
+    </section>
+
+    <section class="card">
+      <h2>📄 许可证</h2>
+      <p>本项目以 GNU GPLv3 或更高版本发布（GPL-3.0-or-later）。详细条款见仓库根目录 <code>LICENSE</code> 文件。</p>
+    </section>
+
+    <footer class="footer">
+      <span>© 2026 huohen92</span>
+      <span class="dot">•</span>
+      <a href="https://www.gnu.org/licenses/" target="_blank" rel="noreferrer">GNU Licenses</a>
+    </footer>
+  </main>
+
+  <script src="./assets/app.js"></script>
+</body>
+</html>
