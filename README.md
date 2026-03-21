@@ -71,12 +71,11 @@ docker-compose up -d
 
 将以下内容保存为 `docker-compose.yml`（或参考 `docker-compose.yml.example` 进行修改），然后执行 `docker-compose up -d`：
 
-```yaml
-version: '3.3'
+`version: '3.3'
 
 services:
   memos-wechat-bot:
-    build: .
+    image: huohen92/memos-wechat-bot:latest   
     container_name: memos-wechat-bot
     restart: unless-stopped
     ports:
