@@ -119,8 +119,34 @@ docker build -t memos-wechat-bot .
 > 说明：非必要变量已按默认值注释，**需要启用时删除 `#`**。
 
 ```bash
-docker run -d   --name memos-wechat-bot   --restart unless-stopped   -p 6330:3000   -v "$(pwd)/data:/data"     # -------------------- 企业微信应用配置（必须）--------------------   -e WECOM_CORP_ID=your_corp_id   -e WECOM_AGENT_ID=your_agent_id   -e WECOM_SECRET=your_secret   -e WECOM_TOKEN=your_token   -e WECOM_ENCODING_AES_KEY=your_encoding_aes_key     # -------------------- Memos 配置（必须）--------------------   -e MEMOS_URL=http://your-memos-ip:5230/api/v1/memos   -e MEMOS_WEB_URL=http://your-memos-ip:5230     # -------------------- 可选配置（按默认值注释，需要时取消注释）--------------------   # -e PROXY_URL=https://qyapi.weixin.qq.com   # -e NO_MENU=false   # -e LOG_LEVEL=info   # -e WECOM_TOUSER=@all   # -e MEMOS_DEFAULT_TAG=#企业微信机器人   # -e MEMOS_VISIBILITY=PRIVATE     memos-wechat-bot
+docker run -d \
+  --name memos-wechat-bot \
+  --restart unless-stopped \
+  -p 6330:3000 \
+  -v "$(pwd)/data:/data" \
+  \
+  # -------------------- 企业微信应用配置（必须）-------------------- \
+  -e WECOM_CORP_ID=your_corp_id \
+  -e WECOM_AGENT_ID=your_agent_id \
+  -e WECOM_SECRET=your_secret \
+  -e WECOM_TOKEN=your_token \
+  -e WECOM_ENCODING_AES_KEY=your_encoding_aes_key \
+  \
+  # -------------------- Memos 配置（必须）-------------------- \
+  -e MEMOS_URL=http://your-memos-ip:5230/api/v1/memos \
+  -e MEMOS_WEB_URL=http://your-memos-ip:5230 \
+  \
+  # -------------------- 可选配置（按默认值注释，需要时取消注释）-------------------- \
+  # -e PROXY_URL=https://qyapi.weixin.qq.com \
+  # -e NO_MENU=false \
+  # -e LOG_LEVEL=info \
+  # -e WECOM_TOUSER=@all \
+  # -e MEMOS_DEFAULT_TAG=#企业微信机器人 \
+  # -e MEMOS_VISIBILITY=PRIVATE \
+  \
+  memos-wechat-bot:latest
 ```
+
 
 ---
 
